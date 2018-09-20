@@ -1,0 +1,6 @@
+pyTelegramBotApi
+requests
+redis
+lxml
+flask
+aiohttp
