@@ -47,7 +47,7 @@ class ParserThread(Thread):
 
 class BalanceThread(Thread):
     def __init__(self, token, message):
-        Thread.__init__(self)
+        Thread.__init__(self)  
         self.token = token
         self.message = message
 
@@ -113,6 +113,21 @@ def send_welcome(message):
     bot.send_message(message.chat.id, welcome, reply_markup=main_menu, parse_mode='HTML')
 
 
+@bot.message_handler(commands=['send'])
+def send_mailing(message):
+    if message.from_user.id == owner_id:
+        sent_message = bot.send_message(message.chat.id, mailing_start, parse_mode='HTML')
+        text_to_send = message.text.replace('/send ', '')
+        times_send = 0
+        for user_id in r.scan_iter():
+            try:
+                bot.send_message(user_id.decode('utf-8'), text_to_send, parse_mode='HTML')
+                times_send += 1
+            except Exception:
+                pass
+        bot.edit_message_text(chat_id=message.chat.id, message_id=sent_message.message_id, text=mailing_end.format(users=str(times_send)), parse_mode='HTML')
+
+
 @bot.message_handler(func=lambda m: m.text == back_button)
 def send_welcome(message):
     bot.send_message(message.chat.id, welcome, reply_markup=main_menu, parse_mode='HTML')
@@ -161,11 +176,7 @@ def callback_inline(call):
                 bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=login)
             else:
                 try:
-                    try:
-                        num[call.message.chat.id] = clients[call.message.chat.id].get_number(call.data)
-                    except NoBalanceError:
-                        bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=not_enough_money)
-
+                    num[call.message.chat.id] = clients[call.message.chat.id].get_number(call.data)
                     balance = clients[call.message.chat.id].get_balance()
                     serv[call.message.chat.id] = services[call.data]
                     markup = make_inline_tools_buttons(num[call.message.chat.id].id)
@@ -173,6 +184,9 @@ def callback_inline(call):
 
                 except NoNumbersError:
                     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=no_numbers, parse_mode='HTML')
+
+                except NoBalanceError:
+                    bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text=not_enough_money)
 
         elif len(call.data.split('_status_')) == 2:
             info = call.data.split('_status_')
