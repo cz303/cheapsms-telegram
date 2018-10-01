@@ -1,7 +1,3 @@
-# cheapsms-telegram
-Исходники бота t.me/cheapsms_bot
-Разработчик: @truecrinny
-
 # Что нового?
 [28.09.18] Добавлена возможность создавать рассылки. Затронуты файлы: main.py, config.py
 
