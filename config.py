@@ -38,7 +38,6 @@ number_ready = 'Готов'
 end_operation = 'Завершить'
 
 main_menu = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-numbers_menu = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 settings_menu = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 balance_menu = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 services_buttons = list()
@@ -48,11 +47,6 @@ num = dict()
 
 main_menu.add(*main_menu_buttons)
 settings_menu.add(*settings_menu_buttons)
-
-for name in list(services.values()):
-    services_buttons.append(types.KeyboardButton(name))
-services_buttons.append(types.KeyboardButton(back_button))
-numbers_menu.add(*services_buttons)
 
 
 def make_inline_buy_button(service):
