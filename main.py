@@ -1,15 +1,22 @@
-from telebot import TeleBot
+from telebot import TeleBot, apihelper
+import telebot.types as types
 import telebot
-from cheapsms import CheapSMS, services, BadKeyError, NoNumbersError, NoActivationError, NoBalanceError
+from cheapsms import CheapSMS, BadKeyError, NoNumbersError, NoActivationError, NoBalanceError
 from config import *
 import redis
 import requests
 import lxml.html as html
 import os
 from threading import Thread
+import threading
 from flask import Flask, request
+import schedule
+import time
+import logging
 server = Flask(__name__)
 bot = TeleBot(token, threaded=True)
+services = {}
+numbers_menu = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 
 
 class CodeThread(Thread):
@@ -36,13 +43,16 @@ class ParserThread(Thread):
         key = list(services.keys())[list(services.values()).index(self.message.text)]
         text = requests.get('https://cheapsms.ru/').text
         content = html.document_fromstring(text)
-        response = content.xpath("//li[@data-id='{}']/label/div/span/text()".format(key))
-        answer = service_data.format(service=self.message.text, number=response[1], price=response[0])
-        if int(response[1].replace(' шт.', '')) < 1:
-            bot.send_message(self.message.chat.id, answer, parse_mode='HTML')
-        else:
-            keyboard = make_inline_buy_button(key)
-            bot.send_message(self.message.chat.id, answer, reply_markup=keyboard, parse_mode='HTML')
+        try:
+            response = content.xpath("//li[@data-id='{}']/label/div/span/text()".format(key))
+            answer = service_data.format(service=self.message.text, number=response[1], price=response[0])
+            if int(response[1].replace(' шт.', '')) < 1:
+                bot.send_message(self.message.chat.id, answer, parse_mode='HTML')
+            else:
+                keyboard = make_inline_buy_button(key)
+                bot.send_message(self.message.chat.id, answer, reply_markup=keyboard, parse_mode='HTML')
+        except Exception:
+            bot.send_message(self.message.chat.id, service_unavailable, parse_mode='HTML')
 
 
 class BalanceThread(Thread):
@@ -76,7 +86,7 @@ def create_balance_thread(token, message):
     thread.start()
 
 
-def check_token(token):
+def check_token(token): 
     try:
         CheapSMS(api_key=token).get_balance()
     except BadKeyError:
@@ -95,6 +105,35 @@ def save_api_key(message):
             bot.send_message(message.chat.id, invalid_token_set, reply_markup=settings_menu, parse_mode='HTML')
 
 
+def auto_updater():
+    schedule.every().day.at('00:00').do(update_services)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+def update_services():
+    names = []
+    numbers = CheapSMS(api_key=cheapsms_test_token).get_numbers_status()
+    for number in list(numbers.keys()):
+        names.append(number.replace('_0', '').replace('_1', ''))
+
+    text = requests.get('https://cheapsms.ru/').text
+    content = html.document_fromstring(text)
+    for name in names:
+        try:
+            response = content.xpath("//li[@data-id='{}']/label/div/h2/text()".format(name))
+            services[name] = response[0]
+        except IndexError:
+            pass
+
+    services_buttons = []
+    for name in list(services.values()):
+        services_buttons.append(types.KeyboardButton(name))
+    services_buttons.append(types.KeyboardButton(back_button))
+    numbers_menu.add(*services_buttons)
+
+
 @server.route('/' + token, methods=['POST'])
 def get_message():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
@@ -105,7 +144,7 @@ def get_message():
 def webhook():
     bot.remove_webhook()
     bot.set_webhook(url=server_url + token)
-    return "!", 200
+    return "", 200
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -127,6 +166,17 @@ def send_mailing(message):
                 pass
         bot.edit_message_text(chat_id=message.chat.id, message_id=sent_message.message_id, text=mailing_end.format(users=str(times_send)), parse_mode='HTML')
 
+
+@bot.message_handler(commands=['services'])
+def send_missed_services(message):
+    if message.from_user.id == owner_id:
+        missed = []
+        numbers = CheapSMS(api_key=cheapsms_test_token).get_numbers_status()
+        for number in list(numbers.keys()):
+            if not number.replace('_0', '').replace('_1', '') in list(services.keys()):
+                missed.append(number.replace('_0', '').replace('_1', ''))
+        bot.send_message(owner_id, services_missed.format(services=', '.join(missed)), parse_mode='HTML')
+        
 
 @bot.message_handler(func=lambda m: m.text == back_button)
 def send_welcome(message):
@@ -213,10 +263,15 @@ def callback_inline(call):
 
 if __name__ == '__main__':
     if is_deploy_version:
-        r = redis.from_url(os.environ.get("REDIS_URL"))
+        r = redis.from_url(os.environ.get('REDIS_URL'))
+        update_services()
+        threading.Thread(target=auto_updater).start()
         bot.remove_webhook()
         bot.set_webhook(url=server_url + token)
-        server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+        server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
     else:
+        apihelper.proxy = {'https': 'socks5h://localhost:9150'}
         r = redis.StrictRedis(host='localhost', port=6379, db=0)
+        update_services()
+        threading.Thread(target=auto_updater).start()
         bot.polling(none_stop=True)
