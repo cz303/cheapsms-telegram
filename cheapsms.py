@@ -2,8 +2,16 @@ import requests
 import json
 
 
-services = {'vk': 'ВКонтакте', 'ok': 'Одноклассники', 'vi': 'Viber', 'tg': 'Telegram', 'wb': 'WeChat', 'go': 'Google', 'av': 'Avito', 'fb': 'Facebook', 'tw': 'Twitter', 'ub': 'Uber', 'gt': 'Gett', 'sn': 'OLX', 'ig': 'Instagram', 'ss': 'SeoSprint', 'ym': 'Юла', 'ma': 'Mail.ru', 'mm': 'Microsoft', 'mb': 'Yahoo', 'we': 'ДругВокруг', 'bd': 'Rambler', 'ya': 'Yandex', 'mt': 'Steam', 'oi': 'Tinder', 'fd': 'Mamba', 'ot': 'Нет в списке', 'qw': 'QIWI', 'oy': 'Okey', 'sm': 'Steemit', 'wm': 'WebMoney', 'fs': 'Фотострана'}
-
+services = {'vk': 'ВКонтакте', 'ok': 'Одноклассники', 'vi': 'Viber', 'tg': 'Telegram', 
+            'wb': 'WeChat', 'go': 'Google', 'av': 'Avito', 
+            'fb': 'Facebook', 'tw': 'Twitter', 'ub': 'Uber', 'gt': 'Gett', 'sn': 'OLX', 
+            'ig': 'Instagram', 'ss': 'SeoSprint', 'ym': 'Юла', 'ma': 'Mail.ru', 'mm': 'Microsoft', 
+            'mb': 'Yahoo', 'we': 'ДругВокруг', 'bd': 'Rambler', 'ya': 'Yandex', 'mt': 'Steam', 
+            'oi': 'Tinder', 'fd': 'Mamba', 'ot': 'Нет в списке', 'qw': 'QIWI', 'oy': 'Okey', 
+            'sm': 'Steemit', 'wm': 'WebMoney', 'fs': 'Фотострана', 'cp': 'CreditPlus', 'py': 'Пятерочка', 
+            'pm': 'AOL', 'pk': 'Перекресток', 'sp': 'Спортмастер', 'ds': 'Дикси', 'wp': 'WhatsApp', 
+            'dd': 'DodoPizza', 'vt': 'Виктория.рф', 'mg': 'Магнолия', 'dc': 'Discord', 'dt': 'Delivery Club',
+'rn': 'Rosneft'}
 
 class BadKeyError(Exception):
     def __init__(self):
