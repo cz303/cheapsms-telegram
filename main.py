@@ -38,7 +38,7 @@ class ParserThread(Thread):
         content = html.document_fromstring(text)
         response = content.xpath("//li[@data-id='{}']/label/div/span/text()".format(key))
         answer = service_data.format(service=self.message.text, number=response[1], price=response[0])
-        if int(response[1].replace(' шт', '')) < 1:
+        if int(response[1].replace(' шт.', '')) < 1:
             bot.send_message(self.message.chat.id, answer, parse_mode='HTML')
         else:
             keyboard = make_inline_buy_button(key)
