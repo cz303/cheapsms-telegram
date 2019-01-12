@@ -165,17 +165,6 @@ def send_mailing(message):
             except Exception:
                 pass
         bot.edit_message_text(chat_id=message.chat.id, message_id=sent_message.message_id, text=mailing_end.format(users=str(times_send)), parse_mode='HTML')
-
-
-@bot.message_handler(commands=['services'])
-def send_missed_services(message):
-    if message.from_user.id == owner_id:
-        missed = []
-        numbers = CheapSMS(api_key=cheapsms_test_token).get_numbers_status()
-        for number in list(numbers.keys()):
-            if not number.replace('_0', '').replace('_1', '') in list(services.keys()):
-                missed.append(number.replace('_0', '').replace('_1', ''))
-        bot.send_message(owner_id, services_missed.format(services=', '.join(missed)), parse_mode='HTML')
         
 
 @bot.message_handler(func=lambda m: m.text == back_button)
