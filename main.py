@@ -113,6 +113,8 @@ def auto_updater():
 
 
 def update_services():
+    services.clear()
+    numbers_menu.keyboard = []
     names = []
     numbers = CheapSMS(api_key=cheapsms_test_token).get_numbers_status()
     for number in list(numbers.keys()):
