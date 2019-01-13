@@ -1,3 +1,4 @@
+from collections import namedtuple
 import requests
 import json
 
@@ -113,10 +114,7 @@ class CheapSMS:
         return Status(status, code)
 
 
-class Status:
-    def __init__(self, status, code):
-        self.status = status
-        self.code = code
+Status = namedtuple('Status', ['status', 'code'])
 
 
 class Operation:
