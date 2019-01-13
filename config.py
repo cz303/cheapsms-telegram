@@ -5,6 +5,7 @@ token = 'telegram bot token'
 cheapsms_test_token = 'f8d597bb7439df66a4eeb5befdee6e44'
 is_deploy_version = bool(os.environ.get('PORT'))
 server_url = 'https://your_app.herokuapp.com/'
+owner_id = 1
 
 welcome = 'Неоффициальный бот для сервиса CheapSMS. Большинство важных функций сайта перенесено в этот удобный и простой интерфейс в Telegram. Разработчик бота: @truecrinny.'
 nums = 'Выберите нужный вам сервис и нажмите на него, чтобы получить информацию и приобрести его.'
