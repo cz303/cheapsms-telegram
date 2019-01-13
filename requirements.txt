@@ -3,4 +3,4 @@ requests
 redis
 lxml
 flask
-aiohttp
+schedule
