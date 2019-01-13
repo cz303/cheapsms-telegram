@@ -2,6 +2,7 @@ from telebot import types
 from cheapsms import services
 import os
 token = 'telegram bot token'
+cheapsms_test_token = 'f8d597bb7439df66a4eeb5befdee6e44'
 is_deploy_version = bool(os.environ.get('PORT'))
 server_url = 'https://your_app.herokuapp.com/'
 
