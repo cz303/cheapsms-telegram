@@ -134,6 +134,7 @@ def update_services():
         services_buttons.append(types.KeyboardButton(name))
     services_buttons.append(types.KeyboardButton(back_button))
     numbers_menu.add(*services_buttons)
+    print(services_buttons)
 
 
 @server.route('/' + token, methods=['POST'])
